@@ -1,6 +1,9 @@
 import time
 import collections
-import glob
+import sys
+
+sys.setrecursionlimit(1000000000)
+orig_stdout = sys.stdout
 
 def isLizardSafe(all_possible_lizards_positions, row_no, column_no):
 
@@ -26,69 +29,108 @@ def isLizardSafe(all_possible_lizards_positions, row_no, column_no):
 
 def display(position_set):
     for i in range(size_of_nursery):
+        a = ""
         for j in range(size_of_nursery):
+
             if (i,j) in trees_coordinates_set:
-                print "2",
+                #print "2"
+                a = a + "2"
             elif (i,j) in position_set:
-                print "1",
+                #print "1"+
+                a = a + "1"
             else:
-                print "0",
-        print "\n",
+                #print "0"+
+                a = a + "0"
+        #print "\n",
+        print(a)
 
 def isRestOfColumnHasTrees(row,col):
 
     #print trees_coordinates_hasttable[col]
     #print [i for i in range(row,size_of_nursery)]
     #print all(select_row in trees_coordinates_hasttable[col] for select_row in [i for i in range(row,size_of_nursery)])
-    return ((len(trees_coordinates_hasttable1[col]) - leftIndex) == (size_of_nursery -1 - row))
-    #return all(select_row in trees_coordinates_hasttable[col] for select_row in [i for i in range(row,size_of_nursery)])
+    return all(select_row in trees_coordinates_hasttable[col] for select_row in [i for i in range(row,size_of_nursery)])
+    '''
+    print "came here"
+    print trees_coordinates_hasttable1[col]
+    print "cal",(size_of_nursery - (row))
+    if size_of_nursery - (row) == len(trees_coordinates_hasttable1[col]):
+        return True
+    else:
+        return False
+        '''
+    '''if col in trees_coordinates_hasttable and trees_coordinates_hasttable[col] != []:
+        print trees_coordinates_hasttable[col]
+        print [i for i in range(row,size_of_nursery)]
+        print all(select_row in trees_coordinates_hasttable[col] for select_row in [i for i in range(row,size_of_nursery)])
+        return all(select_row in trees_coordinates_hasttable[col] for select_row in [i for i in range(row,size_of_nursery)])
+        '''
 
 
-def solveNQUtilNew(lizards_position_set, row, col):
+def solveNQUtilNew(lizards_position_set, row, col,ptr):
+
 
     if len(lizards_position_set) == no_of_lizards and col <= size_of_nursery:
         return True
 
     if col >= size_of_nursery or row > size_of_nursery:
         return False
-    leftIndex = 0
     for i in range(row, size_of_nursery):
 
-        #print "left",leftIndex
-        #display(lizards_position_set)
-        #print "row:",i , "col",col
-        #raw_input()
+        display(lizards_position_set)
+        print "0----------------0"
+        print "row:",i , "col",col
+        raw_input()
 
         if isLizardSafe(lizards_position_set, i, col):
 
             lizards_position_set.add((i,col))
+            #print "LP",lizards_position_set
 
-            if col in trees_coordinates_hasttable1 and len(trees_coordinates_hasttable1[col]) > leftIndex:
+            if col in trees_coordinates_hasttable1 and len(trees_coordinates_hasttable1[col]) > ptr:
 
                 trees_row_deque = trees_coordinates_hasttable1[col]
-                first_tree_pos = trees_row_deque[leftIndex]
-                i = first_tree_pos+1
-                leftIndex += 1
+                #print "In if",trees_row_deque
+                #first_tree_pos = trees_row_deque.popleft()
+                first_tree_pos = trees_row_deque[ptr]
+                ptr += 1
+                #print "here"
 
-                if solveNQUtilNew(lizards_position_set, first_tree_pos+1 ,col) == True:
-                    return True
+                if first_tree_pos+1 == size_of_nursery:
+                    if solveNQUtilNew(lizards_position_set, 0 ,col+1,0) == True:
+                        return True
+                else:
+                    if solveNQUtilNew(lizards_position_set, first_tree_pos+1 ,col,ptr) == True:
+                        return True
+                    else:
+                        print "r,c",i,col
+                        ptr +=1
+                        if (trees_coordinates_hasttable1[col])[ptr] == size_of_nursery-1:
+                            if solveNQUtilNew(lizards_position_set, 0,col+1, ptr) == True:
+                                return True
+                        else:
+                            if solveNQUtilNew(lizards_position_set, trees_row_deque[ptr] ,col,ptr) == True:
+                                return True
 
+                #trees_row_deque.appendleft(first_tree_pos)
+                print "LP1",lizards_position_set
+                print "trees_row_deque",trees_row_deque
             else:
-                if solveNQUtilNew(lizards_position_set, 0 ,col+1) == True:
+                if solveNQUtilNew(lizards_position_set, 0 ,col+1,0) == True:
                     return True
 
             lizards_position_set.remove((i,col))
+            print "poped out:",i,col
 
         else:
+            if i == size_of_nursery-1:
+                return solveNQUtilNew(lizards_position_set, 0, col+1,0)
+
             if (i,col) in trees_coordinates_set:
-                if isRestOfColumnHasTrees(i,col,leftIndex):
-                    i = size_of_nursery-1
-                    return solveNQUtilNew(lizards_position_set, 0, col+1)
-                else:
-                    trees_row_deque2 = trees_coordinates_hasttable1[col]
-                    first_tree_pos1 = trees_row_deque2[leftIndex]
-                    i = first_tree_pos1
-                    leftIndex += 1
+                ptr += 1
+                if isRestOfColumnHasTrees(i,col):
+                    return solveNQUtilNew(lizards_position_set, 0, col+1,ptr)
+
     return False
 
 def run(lizards_position_set):
@@ -97,49 +139,47 @@ def run(lizards_position_set):
     for col in range(size_of_nursery):
         if col in trees_coordinates_hasttable and len(trees_coordinates_hasttable[col]) == size_of_nursery:
             continue
-        if solveNQUtilNew(lizards_position_set, 0, col):
+        if solveNQUtilNew(lizards_position_set, 0, col,0):
             return True,lizards_position_set
 
     return False,set()
 
 
-def readingTestFiles(path):
-    files = glob.glob(path)
-    for fil in files:
-        extractInputFromFile(fil)
+size = raw_input()
+tstart = time.time()
 
-def extractInputFromFile(fil):
+file = open("input"+".txt","r")
+#file1 = open("output"+".txt","w")
+#sys.stdout = file1
 
-    file = open(fil,"r")
-    algorithm_type = file.readline()
-    size_of_nursery = int(file.readline())
-    no_of_lizards = int(file.readline())
+algorithm_type = file.readline()
+size_of_nursery = int(file.readline())
+no_of_lizards = int(file.readline())
 
 
-    trees_coordinates_hasttable = {}
-    trees_coordinates_hasttable1 = {}
-    trees_coordinates_set = set()
+trees_coordinates_hasttable = {}
+trees_coordinates_hasttable1 = {}
+trees_coordinates_set = set()
 
-    count = 0
+count = 0
 
-    for i in range(size_of_nursery):
-        row = file.readline()
-        for j in range(len(row)-1):
-            if row[j] == '2':
-                trees_coordinates_set.add((i,j))
-                if j in trees_coordinates_hasttable:
-                    trees_coordinates_hasttable[j].append(i)
-                    trees_coordinates_hasttable1[j].append(i)
-                else:
-                    trees_coordinates_hasttable[j] = [i]
-                    trees_coordinates_hasttable1[j] = collections.deque()
-                    trees_coordinates_hasttable1[j].append(i)
+for i in range(size_of_nursery):
+    row = file.readline()
+    for j in range(len(row)-1):
+        if row[j] == '2':
+            trees_coordinates_set.add((i,j))
+            if j in trees_coordinates_hasttable:
+                trees_coordinates_hasttable[j].append(i)
+                trees_coordinates_hasttable1[j].append(i)
+            else:
+                trees_coordinates_hasttable[j] = [i]
+                trees_coordinates_hasttable1[j] = collections.deque()
+                trees_coordinates_hasttable1[j].append(i)
 
-    solution,lizards_position_set = run(set())
-    if solution:
-        print "OK"
-        display(lizards_position_set)
-    else:
-        print "Fail"
-    print (time.time())-tstart
-    print count
+solution,lizards_position_set = run(set())
+if solution:
+    print "OK"
+    display(lizards_position_set)
+
+else:
+    print "Fail"
