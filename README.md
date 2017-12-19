@@ -3,4 +3,6 @@ Zookeeper AI is a AI agent who's task is to place baby reptile in a reptile hous
 
 There is a twist to this game. In addition to baby lizards, your nursery may havesome trees planted in it. Your lizards cannot shoot their tongues through the trees nor can agent move a lizard into the same place as a tree. As such, a tree will block any lizard from eating another lizard if it is in the path. Additionally, the tree will block the agnet from moving the lizard to that location.
 
+![Alt text](https://github.com/VaibhavDesai/ZOOKEEPER-AI/blob/master/images/Screen%20Shot%202017-12-19%20at%203.58.02%20PM.png?raw=true "Img1")
+![Alt text](https://github.com/VaibhavDesai/ZOOKEEPER-AI/blob/master/images/Screen%20Shot%202017-12-19%20at%203.55.35%20PM.png?raw=true "Img2")
 
